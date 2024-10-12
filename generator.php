@@ -152,8 +152,16 @@
          */
         //tile a gauche = $tile-1 (murO)
         //tile a droite = $tile+1 (murE)
-        //tile en haut = 
-        
+        //tile en haut =  $tile-width (murN)
+        //tile en bas = $tile+width (murS)
+        $tag = $tile-1;
+        $tad = $tile+1;
+        $teh = $tile-$infosLab["width"];
+        $teb = $tile+$infosLab["width"];
+
+        $tabTileAdj = [$tag, $tad, $teh, $teb];
+        $chx = $tabTileAdj[array_rand($tabTileAdj)];
+        return $chx;
     }
 
     while($infosLab["nbOpenWalls"] != $infosLab["nbOpenWallsTarget"]) {
