@@ -17,6 +17,40 @@
 
 
 
+            ####################################################################
+            ######                                                      ########
+            ######                  BANQUE DE TILESETS                  ########
+            ######                                                      ########
+            ####################################################################
+
+    // structure qui stock tous les jeux de tile disponnibles pour le générateur ainsi que
+    // le chemin vers les tilesets associés.
+    // il se compose toujours de la manière suivante afin de permettre des ajouts rapides:
+    // "nomDuTileset" => [
+    //      "chemin/vers/le/tileset/normal.png",
+    //      "chemin/vers/le/tileset/coloré.png"],
+    //
+    $TILESETS_AVAILABLE = [
+        "default" => [
+            "ressources/2D_Maze_Tiles_White.png", 
+            "ressources/2D_Maze_Tiles_Red.png"],
+
+        "pixel" => [
+            "ressources/pixel.png",
+            "ressources/pixel_coloured.png"],
+    ];
+
+
+
+
+
+
+
+
+
+
+
+
             #################################################################
             ######                                                   ########
             ######                  FONCTIONS DEBUG                  ########
@@ -72,8 +106,30 @@
         die("Erreur: Graine inconnue");  // vérification de la présence de la graine dans la querystring
     }
 
+    if (!isset($_GET["imgWidth"])) {
+        die("Erreur: Taile de l'image inconnue");  // vérification de la présence de la largeur d'image dans la querystring
+    }
 
+    if (!isset($_GET["imgFormat"])) {
+        die("Erreur: Format inconnu");  // vérification de la présence du format de l'image dans la querystring
+    }
+    $exportAsPng = ($_GET["imgFormat"] == "png");
 
+    if (!isset($_GET["tileset"])) {
+        die("Erreur: Tileset inconnu");  // vérification de la présence du tileset à utiliser dans la querystring
+    }
+
+    $tileSetName = $_GET["tileset"];  // on récupère le nom du tileSet
+    $flag = false;                    // falg utilisé pour la vérification de la compatibilité du tileSet
+    foreach ($TILESETS_AVAILABLE as $ts => $_) {
+        if ($ts == $tileSetName) {
+            $flag = true;  // tileSet trouvé
+            break;
+        }
+    }
+    if (!$flag) {
+        die("Erreur: Tileset incorrect");  // incompatibilité du tileset (pas dans la banque de tilesets)
+    }
 
 
 
@@ -92,7 +148,18 @@
             ################################################################
     
 
+    set_time_limit(300);  // on mets la limite de timeout à 5 minutes 
+                          // au cas où l'on rencontre une génération d'un gros labyrinthe
+                          // afin d'éviter d'être timeout et donc d'obtenir une erreur
+    
+
     dbg_echo('<h1 style="width:100%;text-align:center">generator.php - mode DEBUG</h1>');
+    
+    dbg_echo("<details><summary>");  // affichage des données recu avec la querystring
+    dbg_echo('<h2 style="display:inline"><pre style="display:inline">$_GET</pre></h2>');
+    dbg_echo("</summary>");
+    dbg_echo_tab($_GET);
+    dbg_echo("</details><hr>");
 
     
     $infosLab = array(                                 // Structure contenant toutes les informations importantes sur le labyrinthe à génrérer
@@ -278,8 +345,11 @@
     dbg_echo("</summary>");
     dbg_echo("<ul>");
 
-    srand($infosLab["seed"]);  // On utilise la seed spécifiée dans la querystring (une seed qui vaut 0 équivaut à une seed aléatoire dans srand)
-    
+    if ($infosLab["seed"] != 0)
+        srand($infosLab["seed"]);  // On utilise la seed spécifiée dans la querystring (une seed qui vaut 0 équivaut à une seed aléatoire dans srand)
+    else 
+        srand(null);
+
     while($infosLab["nbOpenWalls"] != $infosLab["nbOpenWallsTarget"]) {
         do {
             $indice1 = rand(0, $infosLab["nbTiles"]-1);                   // On récupère un indice aléatoire de tile ...
@@ -358,10 +428,18 @@
             #################################################################
 
 
-    if (!$DEBUG) {
-        header('Content-Type: image/png');  // Header pour indiquer que le contenu est uniquement une image
 
-        $tileSetPath = "ressources/2D_Maze_Tiles_White.png"; // On a ici le chemin vers la tileset (temporaire) ...
+    if (!$DEBUG) {
+
+        // ici, on n'est pas en mode débug, on génère donc l'image du labyrinthe pour la renvoyer
+
+        if ($exportAsPng)  // Header pour indiquer que le contenu est uniquement une image 
+            header('Content-Type: image/png');  // type MIME d'une image png     
+        else
+            header('Content-Type: image/jpeg');  // type MIME d'une image jpg     
+        
+
+        $tileSetPath = $TILESETS_AVAILABLE[$tileSetName][0]; // on récupère le chemin vers la tileset dans la banque de tilesets ...
         $tileSet = imagecreatefrompng($tileSetPath);         // ... et on récupère la tileset à partir de ce chemin
         $tileSize =(int) imagesy($tileSet);  // On récupère la taille des tiles en regardant la hauteur du tileset car les tiles sont carrées
 
@@ -380,17 +458,12 @@
         $labImage = imagecreate($tileSize*$infosLab["width"],  $tileSize*$infosLab["height"]);  // on alloue en mémoire de la place pour le rendu de notre labyrinthe
         $couleurDeFond = imagecolorallocate($labImage, 255, 0, 0);
 
-        // test
-        //for ($i=0; $i<5; $i++) {
-        //    imagecopy($labImage, $tiles[$i], $i*$tileSize, $i*$tileSize, 0, 0, (int)$tileSize, (int)$tileSize);
-        //}
-
         /**
          * parcours de chaque tiles du labyrinthe
          * selon le nombre de murs on attribue une tile
          * par exemple:
          * 1 mur = tile en position 3 du tableau
-         * 2 murs = tile en position 1 ou 4 du tableau (differencier murs adjacents de murs opposes)
+         * 2 murs = tile en position 1 ou 4 du tableau (differencier murs adjacents de murs opposés)
          * 3 murs = tile en position 2 du tableau
          * 0 murs (carrefour) = tile en position 0 du tableau
          * Comme les tiles ne sont pas forcement orientees dans le bon sens 
@@ -462,11 +535,18 @@
             }
             $rotatedTile = imagerotate($tiles[$indiceTile], $angle, 0); //on tourne l'image de la tile selon l'angle approprie
             imagecopy($labImage, $rotatedTile, ($i%$infosLab["width"])*$tileSize, (int)($i/$infosLab["width"])*$tileSize, 0, 0, (int)$tileSize, (int)$tileSize);
-            imagedestroy($rotatedTile); 
+            imagedestroy($rotatedTile);  // on libère la mémoire
         }
 
-        imagepng($labImage);  // on affiche le labyrinthe
+        $targetWidth = $_GET["imgWidth"];  // récupération dans la querystring
+        if ($targetWidth != 0) {  // si la taille de l'image a été choisie par l'utilisateur plutot que par le programme
+            $labImage = imagescale($labImage, $targetWidth);  // alors on redimensionne l'image
+        }
 
+        if ($exportAsPng)  // on affiche le labyrinthe suivant le format spécifié
+            imagepng($labImage);  // ici en png
+        else
+            imagejpeg($labImage);  // ici en jpg
 
         // on libère la mémoire à la fin du rendu
         for ($i=0; $i<$dimensionsLab; $i++) {
@@ -475,8 +555,17 @@
         imagedestroy($tileSet);
         imagedestroy($labImage);
     } else {
+
+        // ici, on est en mode debug, on requete donc generator.php avec la même querystring mais sans l'attribut DEBUG
+
         dbg_echo("<h3>Résultat du labyrinthe :</h3>");
-        dbg_echo('<img src="generator.php?width='. $infosLab["width"] . '&height=' . $infosLab["height"] . '&seed=' .$infosLab["width"] . '">');
+        dbg_echo('<img src="generator.php?width=' . $infosLab["width"] 
+                                    . '&height=' . $infosLab["height"] 
+                                    . '&seed=' . $infosLab["seed"] 
+                                    . '&tileset=' . $tileSetName
+                                    . '&imgWidth=' . $_GET["imgWidth"]
+                                    . '&imgFormat=' . $_GET["imgFormat"]
+                                    . '">');
     }
   
        

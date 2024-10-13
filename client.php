@@ -16,12 +16,15 @@
     <link rel="stylesheet" href="style/client.css">
 </head>
 <body>
-        <h1>MazeMaker Client</h1>
-        <hr>
-        <h2>Personnalisation de votre labyrinthe</h2>
+    <div id="bg_lab"></div>
+
+    <div id="main">
+    <h1>MazeMaker Client</h1>
+    <h2>Personnalisation de votre labyrinthe</h2>
     <?php
         mkForm("generator.php");
 
+        echo("<h3>Paramètres de génération</h3>");
         mkLabel("lab_width", "Largeur du labyrinthe : ");
         mkInput("number", "width", "10" , ["id"=>"lab_width", "required"=>"required"]);
 
@@ -35,7 +38,32 @@
         mkLabel("lab_seed", "Graine du labyrinthe (0=aléatoire) : ");
         mkInput("number", "seed", "0" , ["id"=>"lab_seed", "required"=>"required"]);
 
+        hr();
+
+        echo("<h3>Paramètres d'image</h3>");
+        mkLabel("img_width", "Largeur de l'image en px (0=automatique) : ");
+        mkInput("number", "imgWidth", "0" , ["id"=>"img_width", "required"=>"required"]);
+    
         br();
+
+        mkLabel("imgFormat", "Format de l'image à génerer");
+    ?>
+        <select required name="imgFormat" id="imgFormat">
+            <option value="png">PNG</option>
+            <option value="jpg">JPG</option>
+        </select>
+    <?php
+        hr();
+        echo("<h3>Paramètres du jeu de tuiles</h3>");
+        mkLabel("tileset", "Jeu de tuiles à utiliser");
+    ?>
+        <select required name="tileset" id="tileset">
+            <option value="default">Défaut</option>
+            <option value="pixel">Pixel</option>
+        </select>
+    <?php
+
+        hr();
 
         mkRadioCb("checkbox", "DEBUG", "DEBUG", true);
         mkLabel("DEBUG", "Mode débuggage");
