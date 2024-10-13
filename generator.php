@@ -233,9 +233,48 @@
         return $chx;  // On renvoie l'indice d'une tile compatible adjacente aléatoire
     }
 
+    function fusion($indice1, $indice2) {
+        /**
+         * Regarde quel mur supprimer entre les deux et mets a jour les valeurs
+         * prends aussi en charge le changement des valeurs de toutes les tiles du labyrinthe
+         */
+
+        global $labyrinthe;  // récupération de $labyrinthe qui est en dehors de scope de la fonction
+
+        // détérmination du mur à casser en fonction de l'indice des deux tiles
+        if ($indice1 + 1 == $indice2) {
+            // casser murE à indice1 et murO à indice2
+            $labyrinthe[$indice1]["murE"] = 0;
+            $labyrinthe[$indice2]["murO"] = 0;
+        }
+        else if($indice1 -1 == $indice2){
+            // casser murO à indice1 et murE à indice2
+            $labyrinthe[$indice1]["murO"] = 0;
+            $labyrinthe[$indice2]["murE"] = 0;
+        }
+        else if ($indice1 > $indice2) {
+            // casser murN à indice1 et murS à indice2
+            $labyrinthe[$indice1]["murN"] = 0;
+            $labyrinthe[$indice2]["murS"] = 0;
+        }
+        else{
+            // casser murS à indice1 et murN à indice2
+            $labyrinthe[$indice1]["murS"] = 0;
+            $labyrinthe[$indice2]["murN"] = 0;
+        }
+
+        $valeurAVerif = $labyrinthe[$indice2]["valeur"];     // il faudra écraser les valeurs de toutes les tiles avec cette valeur (celle de tile2) ...
+        $valeurAUtiliser = $labyrinthe[$indice1]["valeur"];  // ... et les remplacer par la valeur de tile1
+
+        // MaJ des valeurs des tiles
+        for ($i=0; $i<count($labyrinthe); $i++) {
+            if ($labyrinthe[$i]["valeur"] == $valeurAVerif) $labyrinthe[$i]["valeur"] = $valeurAUtiliser;
+        }
+    }
+
     // Section de la génération du labyrinthe (random path fusion)
     dbg_echo("<details open><summary>");
-    dbg_echo('<h2 style="display:inline">Génération :</h2>');
+    dbg_echo('<h2 style="display:inline">Génération</h2>');
     dbg_echo("</summary>");
     dbg_echo("<ul>");
 
@@ -250,17 +289,117 @@
         dbg_echo('<li style="list-style: none"><details open style="border-bottom: 1px solid lightgray; width:fit-content"><summary>');
         dbg_echo('<h3 style="display:inline">Choix de fusion n°' . $infosLab["nbOpenWalls"]+1 . '</h3>');
         dbg_echo("</summary>");
-        // TODO: afficher également l'indice des tiles pour debug plus facilement
+        dbg_echo("indice 1: <strong>" . $indice1 . "</strong>");
         dbg_echo_tab($labyrinthe[$indice1]);
+        dbg_echo("indice 2: <strong>" . $indice2 . "</strong>");
+        dbg_echo_tab($labyrinthe[$indice2]);
+        
+        // On utilise la fonction de fusion entre deux tiles
+        fusion($indice1, $indice2);
+
+        dbg_echo('<h3 style="display:inline">Après fusion :</h3>');
+        dbg_echo("<br>indice 1: <strong>" . $indice1 . "</strong>");
+        dbg_echo_tab($labyrinthe[$indice1]);
+        dbg_echo("indice 2: <strong>" . $indice2 . "</strong>");
         dbg_echo_tab($labyrinthe[$indice2]);
         dbg_echo('</details></li>');
         
-        // TODO: supprimer la ligne (utilisée uniquement pour tester sans rester bloqué dans le while)
-        $infosLab["nbOpenWalls"]++;
+        $infosLab["nbOpenWalls"]++;  // On a ouvert un mur entre deux tiles, on incrémente donc la valeur
     }   
 
     dbg_echo("</ul></details><hr>");
 
+    dbg_echo("<details open><summary>");
+    dbg_echo('<h2 style="display:inline"><pre style="display:inline;">$labyrinthe</pre> (après génération)</h2>');
+    dbg_echo("</summary>");
+    dbg_echo_tab($labyrinthe);
+    dbg_echo("</details><hr>");
+
+    // On remet les bordures du labyrinthe
+    for ($i=0; $i<$infosLab["nbTiles"]; $i++) {
+
+        if ($i < $infosLab["width"]) {  // Test ...
+            $labyrinthe[$i]["murN"]=1;  // ... et ajout de la bordure Nord
+        }
+        if($i > ($infosLab["nbTiles"]-1)-$infosLab["width"]) {  // Test ...
+            $labyrinthe[$i]["murS"]=1;                          // ... et ajout de la bordure Sud
+        }
+        if($i%$infosLab["width"]==0){  // Test ...
+            $labyrinthe[$i]["murO"]=1;  // ... et ajoute de la bordure Ouest
+        }
+        if($i%$infosLab["width"]==$infosLab["width"]-1){  // Test ...
+            $labyrinthe[$i]["murE"]=1;                    // ... et ajout de la bordure Est
+        }
+    }
+
+    dbg_echo("<details open><summary>");
+    dbg_echo('<h2 style="display:inline"><pre style="display:inline;">$labyrinthe</pre> (après ajout des bordures)</h2>');
+    dbg_echo("</summary>");
+    dbg_echo_tab($labyrinthe);
+    dbg_echo("</details><hr>");
+        
+    
+
+
+
+
+
+
+
+
+    
+    
+
+
+            #################################################################
+            ######                                                   ########
+            ######                  RENDU GRAPHIQUE                  ########
+            ######                                                   ########
+            #################################################################
+
+
+    if (!$DEBUG) {
+        header('Content-Type: image/png');  // Header pour indiquer que le contenu est uniquement une image
+
+        $tileSetPath = "ressources/2D_Maze_Tiles_White.png"; // On a ici le chemin vers la tileset (temporaire) ...
+        $tileSet = imagecreatefrompng($tileSetPath);         // ... et on récupère la tileset à partir de ce chemin
+        $tileSize =(int) imagesy($tileSet);  // On récupère la taille des tiles en regardant la hauteur du tileset car les tiles sont carrées
+
+        $tiles = array();  // Array qui servira à stocker toutes les tiles de manière indépendante
+
+
+        for ($i = 0; $i < 5; $i ++) {                                                                                            // On parcourt le set de tiles 
+            $tile = imagecrop($tileSet, ['x' => $i*$tileSize, 'y' => 0, 'width' => (int)$tileSize, 'height' => (int)$tileSize]);  //... et on divise le set tiles en éléments de tailles égales 
+            if ($tile !== FALSE) {
+                $tiles[] = $tile;
+                imagedestroy($tile);
+            }
+        }
+
+
+        $labImage = imagecreate($tileSize*$infosLab["width"],  $tileSize*$infosLab["height"]);  // on alloue en mémoire de la place pour le rendu de notre labyrinthe
+        $couleurDeFond = imagecolorallocate($labImage, 255, 0, 0);
+
+        // test
+        for ($i=0; $i<5; $i++) {
+            imagecopy($labImage, $tiles[$i], $i*$tileSize, $i*$tileSize, 0, 0, (int)$tileSize, (int)$tileSize);
+        }
+
+
+        imagepng($labImage);  // on affiche le labyrinthe
+
+
+        // on libère la mémoire à la fin du rendu
+        for ($i=0; $i<5; $i++) {
+            imagedestroy($tiles[$i]);
+        }
+        imagedestroy($tileSet);
+        imagedestroy($labImage);
+    } else {
+        dbg_echo("<h3>Résultat du labyrinthe :</h3>");
+        dbg_echo('<img src="generator.php?width='. $infosLab["width"] . '&height=' . $infosLab["height"] . '&seed=' .$infosLab["width"] . '">');
+    }
+            
 
 ?>
 
