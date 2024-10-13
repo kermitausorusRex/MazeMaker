@@ -2,7 +2,7 @@
     # : name : client.php
     # : authors : VABOIS Juliette & DUTHOIT Thomas
     # : function : GUI to generate perfect mazes
-    # : usage : fill in the form then submit to get your maze image
+    # : usage : fill in the form then submit to get your perfect maze image
 
 
     include_once("libs/maLibForms.php");
@@ -13,11 +13,13 @@
 <head>
     <meta charset="UTF-8">
     <title>MazeMaker Client</title>
+    <link rel="stylesheet" href="style/client.css">
 </head>
 <body>
+        <h1>MazeMaker Client</h1>
+        <hr>
+        <h2>Personnalisation de votre labyrinthe</h2>
     <?php
-        echo "Personnalisation de votre labyrinthe";
-
         mkForm("generator.php");
 
         mkLabel("lab_width", "Largeur du labyrinthe : ");
@@ -44,5 +46,7 @@
         
         endForm();
     ?>
+
+    <footer><p>Par VABOIS Juliette et DUTHOIT Thomas</p></footer>
 </body>
 </html>

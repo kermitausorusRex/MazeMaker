@@ -1,0 +1,31 @@
+body {
+    margin: 0;
+    padding: 0;
+}
+
+h1, h2 {
+    padding-left: 40px;
+}
+
+form {
+    padding: 40px;
+    margin: 40px;
+    width:fit-content;
+    background-color: rgb(226, 226, 226);
+    border-radius: 10px;
+    border: 1px solid gray;
+    line-height: 30px;
+    box-shadow: 10px 5px 5px lightgray ;
+}
+
+footer{
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+    border-top: 1px solid gray;
+    background-color: rgb(226, 226, 226);
+}
+
+footer p {
+    padding-left: 20px;
+}

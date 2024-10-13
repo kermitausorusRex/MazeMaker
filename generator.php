@@ -105,9 +105,11 @@
         'seed' => $_GET["seed"]                        // seed du labyrinthe
     );
 
-    dbg_echo("<h2><pre>\$infosLab</pre></h2>");
+    dbg_echo("<details open><summary>");
+    dbg_echo('<h2 style="display:inline"><pre style="display:inline">$infosLab</pre></h2>');
+    dbg_echo("</summary>");
     dbg_echo_tab($infosLab);
-    dbg_echo("<hr>");
+    dbg_echo("</details><hr>");
 
 
     $objTile = array(      // structure utilisée pour chaque tile du labyrinthe
@@ -119,9 +121,11 @@
         'murO'=> 1,        // mur Ouest (1: fermé, 0: ouvert) |
     );
 
-    dbg_echo('<h2><pre style="display:inline;">$objTile</pre> (par défaut)</h2>');
+    dbg_echo("<details open><summary>");
+    dbg_echo('<h2 style="display:inline"><pre style="display:inline;">$objTile</pre> (par défaut)</h2>');
+    dbg_echo("</summary>");
     dbg_echo_tab($objTile);
-    dbg_echo("<hr>");
+    dbg_echo("</details><hr>");
 
     $labyrinthe = array();
 
@@ -146,9 +150,11 @@
         }
     }
 
-    dbg_echo('<h2><pre style="display:inline;">$labyrinthe</pre> (après remplissage)</h2>');
+    dbg_echo("<details open><summary>");
+    dbg_echo('<h2 style="display:inline"><pre style="display:inline;">$labyrinthe</pre> (après remplissage)</h2>');
+    dbg_echo("</summary>");
     dbg_echo_tab($labyrinthe);
-    dbg_echo("<hr>");
+    dbg_echo("</details><hr>");
     
     
 
@@ -223,19 +229,29 @@
         return $chx;  // On renvoie l'indice d'une tile compatible adjacente aléatoire
     }
 
-    dbg_echo('<h2>Génération :</h2>');
+    dbg_echo("<details open><summary>");
+    dbg_echo('<h2 style="display:inline">Génération :</h2>');
+    dbg_echo("</summary>");
+    dbg_echo("<ul>");
+    
     while($infosLab["nbOpenWalls"] != $infosLab["nbOpenWallsTarget"]) {
         do {
             $indice1 = rand(0, $infosLab["nbTiles"]-1);                   // On récupère un indice aléatoire de tile ...
         } while (($indice2 = choisirTileAdjacenteAlea($indice1)) == -1);  // ... tant qu'on trouve ne trouve pas au moins une case compatible pour une fusion
 
-        dbg_echo("<h3>Choix de fusion n°" . $infosLab["nbOpenWalls"]+1 . " :</h3>");
+        dbg_echo('<li style="list-style: none"><details open style="border-bottom: 1px solid lightgray; width:fit-content"><summary>');
+        dbg_echo('<h3 style="display:inline">Choix de fusion n°' . $infosLab["nbOpenWalls"]+1 . '</h3>');
+        dbg_echo("</summary>");
         dbg_echo_tab($labyrinthe[$indice1]);
         dbg_echo_tab($labyrinthe[$indice2]);
+        dbg_echo('</details></li>');
         
         // TODO: supprimer la ligne (utilisée uniquement pour tester sans rester bloqué dans le while)
         $infosLab["nbOpenWalls"]++;
     }   
+
+    dbg_echo("</ul></details><hr>");
+
 
 ?>
 
