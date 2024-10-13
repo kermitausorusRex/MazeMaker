@@ -8,7 +8,8 @@ interface à utiliser pour la génération de labyrinthes, gère toute la commun
 
 ## generator.php
 script à requeter pour la génération de labyrinthes
-querystring:
+
+les différents paramètres du labyrinthe sont passés dans la querystring avec les attributs suivants:
 - `width`: largeur du labyrinthe
 - `height`: hauteur du labyrinthe
 - `seed`: graine de génération à utiliser (0 = aléatoire)
