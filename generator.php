@@ -105,6 +105,7 @@
         'seed' => $_GET["seed"]                        // seed du labyrinthe
     );
 
+    // affichage de la structure infosLab si on est en mode debug sous la forme d'une section repliable avec la balise <details>
     dbg_echo("<details open><summary>");
     dbg_echo('<h2 style="display:inline"><pre style="display:inline">$infosLab</pre></h2>');
     dbg_echo("</summary>");
@@ -121,13 +122,14 @@
         'murO'=> 1,        // mur Ouest (1: fermé, 0: ouvert) |
     );
 
+    // affichage de la structure objTile par défaut
     dbg_echo("<details open><summary>");
     dbg_echo('<h2 style="display:inline"><pre style="display:inline;">$objTile</pre> (par défaut)</h2>');
     dbg_echo("</summary>");
     dbg_echo_tab($objTile);
     dbg_echo("</details><hr>");
 
-    $labyrinthe = array();
+    $labyrinthe = array();  // tableau qui contiendra l'entièreté des tiles de notre labyrinthe
 
     for ($i=0; $i<$infosLab["nbTiles"]; $i++) {
         $labyrinthe[]=$objTile;          // On clone notre structure
@@ -150,6 +152,8 @@
         }
     }
 
+    // affichage du labyrinthe après son remplissage avec des objTiles, pour vérifier si il est correctement rempli
+    // et si les valeurs des tiles sont correctes
     dbg_echo("<details open><summary>");
     dbg_echo('<h2 style="display:inline"><pre style="display:inline;">$labyrinthe</pre> (après remplissage)</h2>');
     dbg_echo("</summary>");
@@ -216,8 +220,8 @@
         $flag=false;
         for ($i=0; $i<count($tabTileAdj); $i++) {
             if ($labyrinthe[$tabTileAdj[$i]]["valeur"] != $tile["valeur"]) {  // test de valeurs différentes
-                $flag = true;
-                break;
+                $flag = true;  // on a detecté une valeur différente, on met le flag a true ...
+                break;         // ... et on sort de la boucle car ça ne sert plus à rien
             }
         }
         if (!$flag) return -1;  // Incompatible: toutes les tiles adjacentes ont la meme valeur
@@ -229,19 +233,24 @@
         return $chx;  // On renvoie l'indice d'une tile compatible adjacente aléatoire
     }
 
+    // Section de la génération du labyrinthe (random path fusion)
     dbg_echo("<details open><summary>");
     dbg_echo('<h2 style="display:inline">Génération :</h2>');
     dbg_echo("</summary>");
     dbg_echo("<ul>");
+
+    srand($infosLab["seed"]);  // On utilise la seed spécifiée dans la querystring (une seed qui vaut 0 équivaut à une seed aléatoire dans srand)
     
     while($infosLab["nbOpenWalls"] != $infosLab["nbOpenWallsTarget"]) {
         do {
             $indice1 = rand(0, $infosLab["nbTiles"]-1);                   // On récupère un indice aléatoire de tile ...
         } while (($indice2 = choisirTileAdjacenteAlea($indice1)) == -1);  // ... tant qu'on trouve ne trouve pas au moins une case compatible pour une fusion
 
+        // On affiche chaque choix de fusion
         dbg_echo('<li style="list-style: none"><details open style="border-bottom: 1px solid lightgray; width:fit-content"><summary>');
         dbg_echo('<h3 style="display:inline">Choix de fusion n°' . $infosLab["nbOpenWalls"]+1 . '</h3>');
         dbg_echo("</summary>");
+        // TODO: afficher également l'indice des tiles pour debug plus facilement
         dbg_echo_tab($labyrinthe[$indice1]);
         dbg_echo_tab($labyrinthe[$indice2]);
         dbg_echo('</details></li>');
