@@ -381,16 +381,95 @@
         $couleurDeFond = imagecolorallocate($labImage, 255, 0, 0);
 
         // test
-        for ($i=0; $i<5; $i++) {
-            imagecopy($labImage, $tiles[$i], $i*$tileSize, $i*$tileSize, 0, 0, (int)$tileSize, (int)$tileSize);
-        }
+        //for ($i=0; $i<5; $i++) {
+        //    imagecopy($labImage, $tiles[$i], $i*$tileSize, $i*$tileSize, 0, 0, (int)$tileSize, (int)$tileSize);
+        //}
 
+        /**
+         * parcours de chaque tiles du labyrinthe
+         * selon le nombre de murs on attribue une tile
+         * par exemple:
+         * 1 mur = tile en position 3 du tableau
+         * 2 murs = tile en position 1 ou 4 du tableau (differencier murs adjacents de murs opposes)
+         * 3 murs = tile en position 2 du tableau
+         * 0 murs (carrefour) = tile en position 0 du tableau
+         * Comme les tiles ne sont pas forcement orientees dans le bon sens 
+         */
+        $dimensionsLab = $infosLab["width"]*$infosLab["height"];
+        for($i=0;$i<$dimensionsLab;$i++){
+            $murN = $labyrinthe[$i]["murN"];
+            $murE = $labyrinthe[$i]["murE"];
+            $murS = $labyrinthe[$i]["murS"];
+            $murO = $labyrinthe[$i]["murO"];
+
+            $nbMursTile = $murN + $murE + $murS + $murO;
+
+            switch($nbMursTile){
+                case 0: //carrefour
+                    $indiceTile = 0;
+                break;
+
+                case 1:
+                    if($murN){
+                        $indiceTile = 3;
+                        $angle = 90;
+                    }else if($murE){
+                        $indiceTile = 3;
+                        $angle = 0;
+                    }else if($murS) {
+                        $indiceTile = 3;
+                        $angle = 270;
+                    }else if($murO) {
+                        $indiceTile = 3;
+                        $angle = 180;
+                    } 
+                break; 
+                
+                case 2:
+                    if($murN && $murE){
+                        $indiceTile = 1;
+                        $angle = 0;
+                    }else if($murE && $murS){
+                        $indiceTile = 1;
+                        $angle = 270;
+                    }else if($murS && $murO){
+                        $indiceTile = 1;
+                        $angle = 180;
+                    }else if($murO && $murN){
+                        $indiceTile = 1;
+                        $angle = 90;
+                    }else if($murN && $murS){
+                        $indiceTile = 4;
+                        $angle = 270;
+                    }else{
+                        $indiceTile = 4;
+                        $angle = 0;
+                    }
+                break;
+
+                case 3:
+                    $indiceTile = 2;
+                    if($murO && $murN && $murE){
+                        $angle = 0;
+                    }else if($murN && $murE && $murS){
+                        $angle = 270;
+                    }else if($murE && $murS && $murO){
+                        $angle = 180;
+                    }else{
+                        $angle = 90;
+                    }
+                break;
+            }
+            $rotatedTile = imagerotate($tiles[$indiceTile], $angle, 0); //on tourne l'image de la tile selon l'angle approprie
+            imagecopy($labImage, $rotatedTile, ($i%$infosLab["width"])*$tileSize, (int)($i/$infosLab["width"])*$tileSize, 0, 0, (int)$tileSize, (int)$tileSize);
+            imagedestroy($rotatedTile); 
+        }
 
         imagepng($labImage);  // on affiche le labyrinthe
 
 
         // on libère la mémoire à la fin du rendu
-        for ($i=0; $i<5; $i++) {
+        for ($i=0; $i<$dimensionsLab; $i++) {
             imagedestroy($tiles[$i]);
         }
         imagedestroy($tileSet);
@@ -399,7 +478,8 @@
         dbg_echo("<h3>Résultat du labyrinthe :</h3>");
         dbg_echo('<img src="generator.php?width='. $infosLab["width"] . '&height=' . $infosLab["height"] . '&seed=' .$infosLab["width"] . '">');
     }
-            
+  
+       
 
 ?>
 
