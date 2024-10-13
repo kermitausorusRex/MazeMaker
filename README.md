@@ -22,7 +22,7 @@ querystring:
     - Une banque de tuiles est fournie avec le sujet, il vous est possible d’en produire d’autres
  =>Chaque banque de tuiles devra être composée d’une unique image png comportant 5 tuiles carrées organisées de la manière suivante :
 
-    ![tiles](http://github.com/kermitausorusRex/MazeMaker/ressources/2D_Maze_Tiles_White.png)
+    ![tiles](https://github.com/kermitausorusRex/MazeMaker/blob/main/ressources/2D_Maze_Tiles_White.png)
   
 				
     - Ordre des tuiles dans les fichiers fournis. Dans les fichiers, les tuiles doivent en réalité être collées les unes aux autres. Source originale : [2D Maze Tiles sur Itch.io](https://mapsandapps.itch.io/2d-maze-tiles)
