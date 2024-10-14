@@ -60,6 +60,7 @@
         <select required name="tileset" id="tileset">
             <option value="default">Défaut</option>
             <option value="pixel">Pixel</option>
+            <option value="pacman">Pacman</option>
         </select>
     <?php
 

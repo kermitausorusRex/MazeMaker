@@ -16,7 +16,7 @@ les différents paramètres du labyrinthe sont passés dans la querystring avec 
 - `DEBUG`: si `DEBUG` est présent dans la querystring, le générateur fonctionnera comme une page html standard et affichera le déroulé des opérations pour la génération de labyrinthe, ainsi que le résultat en bas de la page, sinon, le script renvoie juste l'image du labyrinthe
 - `imgWidth`: largeur de l'image en pixel (0 = automatique), la hauteur de l'image sera décidée automatiquement afin de maintenir un ratio d'image correct pour le labyrinthe
 - `imgFormat`: format de l'image générée, doit être compris parmis { `png` , `jpg` }
-- `tileset`: le jeu de tuiles à utiliser parmis ceux disponnibles, doit être compris parmis { `default`, `pixel` } mais il est toujours possible d'ajouter d'autres jeux de tuiles dans la structure `$TILESETS_AVAILABLE` au début du fichier `generator.php` 
+- `tileset`: le jeu de tuiles à utiliser parmis ceux disponnibles, doit être compris parmis { `default`, `pixel` , `pacman` } mais il est toujours possible d'ajouter d'autres jeux de tuiles dans la structure `$TILESETS_AVAILABLE` au début du fichier `generator.php` 
 
 ---
 

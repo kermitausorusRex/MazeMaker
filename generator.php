@@ -38,6 +38,9 @@
         "pixel" => [
             "ressources/pixel.png",
             "ressources/pixel_coloured.png"],
+        "pacman" => [
+            "ressources/pacman.png",
+            "ressources/pacman_coloured.png"],
     ];
 
 
