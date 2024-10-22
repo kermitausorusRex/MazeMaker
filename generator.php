@@ -350,8 +350,8 @@
 
     if ($infosLab["seed"] != 0)
         srand($infosLab["seed"]);  // On utilise la seed spécifiée dans la querystring (une seed qui vaut 0 équivaut à une seed aléatoire dans srand)
-    else 
-        srand(null);
+    //else 
+        //srand(null);
 
     while($infosLab["nbOpenWalls"] != $infosLab["nbOpenWallsTarget"]) {
         do {
