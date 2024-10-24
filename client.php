@@ -71,11 +71,16 @@
 
         br();
 
+        mkRadioCb("checkbox", "SOLUTION", "SOLUTION", true);
+        mkLabel("SOLUTION", "Affichage de la solution");
+
+        br();
+
         mkInput("submit", "", "Générer !");
         
         endForm();
     ?>
 
-    <footer><p>Par VABOIS Juliette et DUTHOIT Thomas</p></footer>
+    <footer><p>Par DUTHOIT Thomas et VABOIS Juliette</p></footer>
 </body>
 </html>
