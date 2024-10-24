@@ -77,14 +77,6 @@
 
 
 
-
-
-
-
-
-
-
-
             ###################################################################
             ######                                                     ########
             ######                  VERIFICATIONS GET                  ########
@@ -93,9 +85,14 @@
 
 
     $DEBUG = false;
+    $SOLUTION = false;
 
     if (isset($_GET["DEBUG"])) {  // récupération du mode DEBUG
         $DEBUG = true;
+    }
+
+    if(isset($_GET["SOLUTION"])){
+        $SOLUTION=true;
     }
 
     if (!isset($_GET["width"])) {
@@ -351,7 +348,7 @@
     if ($infosLab["seed"] != 0)
         srand($infosLab["seed"]);  // On utilise la seed spécifiée dans la querystring (une seed qui vaut 0 équivaut à une seed aléatoire dans srand)
     //else 
-        //srand(null);
+       //srand(null);
 
     while($infosLab["nbOpenWalls"] != $infosLab["nbOpenWallsTarget"]) {
         do {
@@ -391,10 +388,10 @@
     // On remet les bordures du labyrinthe
     for ($i=0; $i<$infosLab["nbTiles"]; $i++) {
 
-        if ($i < $infosLab["width"]) {  // Test ...
+        if ($i < $infosLab["width"] && $i!=0) {  // Test ...
             $labyrinthe[$i]["murN"]=1;  // ... et ajout de la bordure Nord
         }
-        if($i > ($infosLab["nbTiles"]-1)-$infosLab["width"]) {  // Test ...
+        if($i > ($infosLab["nbTiles"]-1)-$infosLab["width"] && $i!=($infosLab["nbTiles"]-1)) {  // Test ...
             $labyrinthe[$i]["murS"]=1;                          // ... et ajout de la bordure Sud
         }
         if($i%$infosLab["width"]==0){  // Test ...
@@ -404,6 +401,7 @@
             $labyrinthe[$i]["murE"]=1;                    // ... et ajout de la bordure Est
         }
     }
+
 
     dbg_echo("<details open><summary>");
     dbg_echo('<h2 style="display:inline"><pre style="display:inline;">$labyrinthe</pre> (après ajout des bordures)</h2>');
@@ -415,13 +413,92 @@
 
 
 
+            #################################################################
+            ######                                                   ########
+            ######                RESOLUTION AVEC A*                 ########
+            ######                                                   ########
+            #################################################################
 
+            /*
+            Le but de l'algorithme A* est d'attribuer des potentiels aux nodes 
+            tout en leur appliquant le meme raisonnement que pour l'algorithme 
+            de Dijkstra pour avoir une "zone d'exploration" moins importante, 
+            et donc trouver la solution plus rapidement.
+            */
 
+            function getNeigh($node, $labyrinthe, $infosLab){
+                $neigh=[];
+                $x = $node[0];
+                $y = $node[1];
+                $ind = $y*$infosLab["width"]+$y;
+                $tile = $labyrinthe[$ind];
 
+                if (!$tile['murN'] && $y > 0) $neigh[] = [$x, $y-1];
+                if (!$tile['murS'] && $y < $infosLab['height']-1) $neigh[] = [$x, $y+1];
+                if (!$tile['murE'] && $x < $infosLab['width']-1) $neigh[] = [$x+1, $y];
+                if (!$tile['murO'] && $x > 0) $neigh[] = [$x-1, $y];
 
+                return $neigh;
+            }
 
-    
-    
+            /*
+            function heuristic($pA, $pB){
+                //fonction mathematique trouvee sur internet: distance de Manhattan
+                $res = abs($pA[0]-$pb[0]) + abs($pA[1]-$pB[1]);
+                return $res;
+            }
+
+            function pythagore($pA, $pB, $pC){
+                $res = sqrt($)
+            }
+            */
+
+            /*
+            function AStar($labyrinthe, $nodeStart, $nodeFinish){
+                
+                Les parametres de la fonction sont:
+                - le labyrinthe que l'on souhaite resoudre
+                - la case depart et la case arrive (en haut a gauche et en bas a droite dans notre cas)
+                - h = heuristique
+                - f = cout total du node 
+
+                f le cout total se calcule en faisant la somme de g la distance entre le node de depart
+                et h l'heuristique
+            }*/
+
+            /*
+            function reconstruct_path($parents, $current){
+                $start = [0, 0]; // Point de départ
+                $goal = [$infosLab['width']-1, $infosLab['height']-1]; // Point d'arrivée
+                $path = AStar($labyrinthe, $start, $goal, $infosLab);
+                dbg_echo_tab($path);
+            }
+
+            function AStar( $start, $finish) {
+                global $labyrinthe;
+                global $infosLab;
+
+                dbg_echo("<h3> Entree dans Astar avec start=$start et finish=$finish </h3>");
+
+                $openList=array($labyrinthe[$start]); //contient les noeuds a evaluer
+                $closedList=array();//contient les noeuds deja evalues
+                $currentNode;
+
+                while(!empty($openList)){
+                    $currentNode=$openList[];
+
+                }
+
+                
+
+                
+            }
+                */
+        
+    if($SOLUTION && $DEBUG){
+        AStar(0,$infosLab["width"]*$infosLab["height"]-1);
+    }
+
 
 
             #################################################################
@@ -435,6 +512,8 @@
     if (!$DEBUG) {
 
         // ici, on n'est pas en mode débug, on génère donc l'image du labyrinthe pour la renvoyer
+        $tilesetNormal = imagecreatefrompng($TILESETS_AVAILABLE[$tileSetName][0]);
+        $tilesetColored = imagecreatefrompng($TILESETS_AVAILABLE[$tileSetName][1]);
 
         if ($exportAsPng)  // Header pour indiquer que le contenu est uniquement une image 
             header('Content-Type: image/png');  // type MIME d'une image png     
@@ -541,6 +620,14 @@
             imagedestroy($rotatedTile);  // on libère la mémoire
         }
 
+
+        if ($SOLUTION) {
+            //AStar($labyrinthe, $start, $goal, $infosLab);
+        
+    
+        }
+
+
         $targetWidth = $_GET["imgWidth"];  // récupération dans la querystring
         if ($targetWidth != 0) {  // si la taille de l'image a été choisie par l'utilisateur plutot que par le programme
             $labImage = imagescale($labImage, $targetWidth);  // alors on redimensionne l'image
@@ -557,9 +644,18 @@
         }
         imagedestroy($tileSet);
         imagedestroy($labImage);
+
+
+
+        
+        
+
+
+
     } else {
 
         // ici, on est en mode debug, on requete donc generator.php avec la même querystring mais sans l'attribut DEBUG
+        $solu = ($SOLUTION)?"&SOLUTION=SOLUTION":"";
 
         dbg_echo("<h3>Résultat du labyrinthe :</h3>");
         dbg_echo('<img src="generator.php?width=' . $infosLab["width"] 
@@ -568,6 +664,7 @@
                                     . '&tileset=' . $tileSetName
                                     . '&imgWidth=' . $_GET["imgWidth"]
                                     . '&imgFormat=' . $_GET["imgFormat"]
+                                    . $solu
                                     . '">');
     }
   
