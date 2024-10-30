@@ -173,7 +173,7 @@
     );
 
     // affichage de la structure infosLab si on est en mode debug sous la forme d'une section repliable avec la balise <details>
-    dbg_echo("<details open><summary>");
+    dbg_echo("<details><summary>");
     dbg_echo('<h2 style="display:inline"><pre style="display:inline">$infosLab</pre></h2>');
     dbg_echo("</summary>");
     dbg_echo_tab($infosLab);
@@ -190,7 +190,7 @@
     );
 
     // affichage de la structure objTile par défaut
-    dbg_echo("<details open><summary>");
+    dbg_echo("<details><summary>");
     dbg_echo('<h2 style="display:inline"><pre style="display:inline;">$objTile</pre> (par défaut)</h2>');
     dbg_echo("</summary>");
     dbg_echo_tab($objTile);
@@ -221,7 +221,7 @@
 
     // affichage du labyrinthe après son remplissage avec des objTiles, pour vérifier si il est correctement rempli
     // et si les valeurs des tiles sont correctes
-    dbg_echo("<details open><summary>");
+    dbg_echo("<details><summary>");
     dbg_echo('<h2 style="display:inline"><pre style="display:inline;">$labyrinthe</pre> (après remplissage)</h2>');
     dbg_echo("</summary>");
     dbg_echo_tab($labyrinthe);
@@ -340,7 +340,7 @@
     }
 
     // Section de la génération du labyrinthe (random path fusion)
-    dbg_echo("<details open><summary>");
+    dbg_echo("<details><summary>");
     dbg_echo('<h2 style="display:inline">Génération</h2>');
     dbg_echo("</summary>");
     dbg_echo("<ul>");
@@ -379,7 +379,7 @@
 
     dbg_echo("</ul></details><hr>");
 
-    dbg_echo("<details open><summary>");
+    dbg_echo("<details><summary>");
     dbg_echo('<h2 style="display:inline"><pre style="display:inline;">$labyrinthe</pre> (après génération)</h2>');
     dbg_echo("</summary>");
     dbg_echo_tab($labyrinthe);
@@ -403,7 +403,7 @@
     }
 
 
-    dbg_echo("<details open><summary>");
+    dbg_echo("<details><summary>");
     dbg_echo('<h2 style="display:inline"><pre style="display:inline;">$labyrinthe</pre> (après ajout des bordures)</h2>');
     dbg_echo("</summary>");
     dbg_echo_tab($labyrinthe);
@@ -426,80 +426,146 @@
             et donc trouver la solution plus rapidement.
             */
 
-            function getNeigh($node, $labyrinthe, $infosLab){
-                $neigh=[];
-                $x = $node[0];
-                $y = $node[1];
-                $ind = $y*$infosLab["width"]+$y;
-                $tile = $labyrinthe[$ind];
+            
 
-                if (!$tile['murN'] && $y > 0) $neigh[] = [$x, $y-1];
-                if (!$tile['murS'] && $y < $infosLab['height']-1) $neigh[] = [$x, $y+1];
-                if (!$tile['murE'] && $x < $infosLab['width']-1) $neigh[] = [$x+1, $y];
-                if (!$tile['murO'] && $x > 0) $neigh[] = [$x-1, $y];
 
-                return $neigh;
+    function AStar($start, $finish) {
+        global $labyrinthe;
+        global $infosLab;
+        $gMap = mapDistancesReelles($start);
+
+        dbg_echo("<h3> Entree dans Astar avec start=$start et finish=$finish </h3>");
+
+        $openList=array($start); //contient les noeuds a evaluer
+        $closedList=array();//contient les noeuds deja evalues
+        $currentNode;
+        $nodeSuccessor;
+
+        while(!empty($openList)){
+            $solution=array();  // Tableau contenant la solution du labyrinthe
+
+            $minIdx = 0;                                               // | => on récupère le noeud (l'indice de case) avec le plus petit f (f=distance réelle + heuristique)
+            $minVal = heuristique($minIdx, $finish) + $gMap[$minIdx];  // |
+            for($i=1;$i<sizeof($openList);$i++){                       // |
+                $h = heuristique($openList[$i], $finish);              // |
+                $f = $h + $gMap[$openList[$i]];                        // |
+                if($f<$minVal){                                        // |
+                    $minIdx=$i;                                        // |
+                    $minVal=$f;                                        // |
+                }                                                      // |
+            }                                                          // |
+            $currentNode = $openList[$minIdx];                         // |
+
+            array_splice($openList, $minIdx, 1);
+
+            if($currentNode==$finish){  // on est arrivé sur le noeud de destination
+                $solution[] = $currentNode;  // on ajoute le current node à la solution
+                return $solution;
             }
 
-            /*
-            function heuristic($pA, $pB){
-                //fonction mathematique trouvee sur internet: distance de Manhattan
-                $res = abs($pA[0]-$pb[0]) + abs($pA[1]-$pB[1]);
-                return $res;
-            }
+            foreach(getVoisins($currentNode) as $nodeSuccessor){
+                //$successorCurrentCost=$gMap[$nodeSuccessor];
 
-            function pythagore($pA, $pB, $pC){
-                $res = sqrt($)
-            }
-            */
-
-            /*
-            function AStar($labyrinthe, $nodeStart, $nodeFinish){
-                
-                Les parametres de la fonction sont:
-                - le labyrinthe que l'on souhaite resoudre
-                - la case depart et la case arrive (en haut a gauche et en bas a droite dans notre cas)
-                - h = heuristique
-                - f = cout total du node 
-
-                f le cout total se calcule en faisant la somme de g la distance entre le node de depart
-                et h l'heuristique
-            }*/
-
-            /*
-            function reconstruct_path($parents, $current){
-                $start = [0, 0]; // Point de départ
-                $goal = [$infosLab['width']-1, $infosLab['height']-1]; // Point d'arrivée
-                $path = AStar($labyrinthe, $start, $goal, $infosLab);
-                dbg_echo_tab($path);
-            }
-
-            function AStar( $start, $finish) {
-                global $labyrinthe;
-                global $infosLab;
-
-                dbg_echo("<h3> Entree dans Astar avec start=$start et finish=$finish </h3>");
-
-                $openList=array($labyrinthe[$start]); //contient les noeuds a evaluer
-                $closedList=array();//contient les noeuds deja evalues
-                $currentNode;
-
-                while(!empty($openList)){
-                    $currentNode=$openList[];
+                if (in_array($nodeSuccessor, $openList)) continue;
+                else if(in_array($nodeSuccessor, $closedList)) continue;
+                else {
+                    $openList[]=$nodeSuccessor;
 
                 }
-
-                
-
-                
             }
-                */
+
+            $closedList[]=$currentNode;
+        }
+        if ($currentNode != $finish) {
+            dbg_echo("error");
+        }
         
+
+    }
+    
+    function getVoisins($idx){
+        global $infosLab;  // récupération des variables
+        global $labyrinthe;
+        $voisins=[];
+        $x = $idx%$infosLab["width"];
+        $y = floor($idx/$infosLab["width"]);
+        $tile = $labyrinthe[$idx];
+
+        if (!$tile['murN'] && $y > 0) $voisins[] = $idx-$infosLab["width"];
+        if (!$tile['murS'] && $y < $infosLab['height']-1) $voisins[] = $idx+$infosLab["width"];
+        if (!$tile['murE'] && $x < $infosLab['width']-1) $voisins[] = $idx+1;
+        if (!$tile['murO'] && $x > 0) $voisins[] = $idx-1;
+
+        return $voisins;
+    }
+
+    function heuristique($idx, $finish_idx){
+        global $infosLab;  // on récupère les variables 
+        $dx = abs($idx%$infosLab["width"] - $finish_idx%$infosLab["width"]);  // idx%width permet de récuperer une composante X dans le labyrinthe
+        $dy = abs(floor($idx/$infosLab["width"]) - floor($finish_idx/$infosLab["width"]));  // floor(idx/width) permet de récupérer la composante Y d'un indice
+        return $dx + $dy;
+    }
+    
+    function mapDistancesReelles($start){
+        global $labyrinthe;  // récupération des variables qui sont en dehors du scope de la fonction
+        global $infosLab;
+
+        // distance reelle entre deux points qui sera le parametre g de notre fonction A*
+        $cpt=0;  // nombre de cases déjà modifiées
+        $val=0;  // valeur de distance actuelle
+        $map=array();  // tableau qui contiendra les distances réelles de chaque case
+        for ($i=0; $i<$infosLab["width"]*$infosLab["height"]; $i++) $map[]=-1;  // -1 est la valeur à remplacer
+
+        $tmp=array();  // tableau temporaire
+        $aChanger=array($start);  // liste des indices où l'on doit changer la valeur
+
+
+        while($cpt!=$infosLab["width"]*$infosLab["height"]-1){  // tant que le bon nombre de case n'a pas été changé
+            $tmp=array();  // on vide le tableau temporaire
+            for($i=0;$i<sizeof($aChanger);$i++){           // pour chaque case à changer:
+                $map[$aChanger[$i]]=$val;                  // - on lui assigne la bonne valeur de distance
+                foreach(getVoisins($aChanger[$i]) as $v){  // - on ajoute ses voisins dans le tableau temporaire
+                    // si on à -1 dans la map, alors on l'ajoute au tableau temporaire
+                    if($map[$v]==-1) $tmp[]=$v;
+                }
+                $cpt++;  // on a fini le traitement sur une case, sa valeur est correcte, on augmente le compteur
+            }
+            $aChanger=$tmp;  // on assigne les nouveaux indices pour lesquels changer la valeur de distance
+            $val++;  // on augmente la valeur de distance d'une unité
+        }
+        return $map;  // on renvoie la map des distances
+    }
+
+
     if($SOLUTION && $DEBUG){
         AStar(0,$infosLab["width"]*$infosLab["height"]-1);
     }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
 
             #################################################################
             ######                                                   ########
