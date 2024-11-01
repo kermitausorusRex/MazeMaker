@@ -17,6 +17,9 @@ les différents paramètres du labyrinthe sont passés dans la querystring avec 
 - `imgWidth`: largeur de l'image en pixel (0 = automatique), la hauteur de l'image sera décidée automatiquement afin de maintenir un ratio d'image correct pour le labyrinthe
 - `imgFormat`: format de l'image générée, doit être compris parmis { `png` , `jpg` }
 - `tileset`: le jeu de tuiles à utiliser parmis ceux disponnibles, doit être compris parmis { `default`, `pixel` , `pacman` } mais il est toujours possible d'ajouter d'autres jeux de tuiles dans la structure `$TILESETS_AVAILABLE` au début du fichier `generator.php` 
+- `SOLUTION`: si `SOLUTION` est présent dans la querystring, le générateur prendra en compte `start`et `finish` pour tracer la solution du labyrinthe
+- `start`: indice de la case d'entrée du labyrinthe
+- `finish`: indice de la case de sortie du labyrinthe
 
 ---
 

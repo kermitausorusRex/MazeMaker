@@ -4,7 +4,6 @@
     # : function : generate perfect mazes
     # : usage : request to get an image, arguments to use are specified in README.md
     # : principle : random path fusion (https://fr.wikipedia.org/wiki/Modélisation_mathématique_d%27un_labyrinthe)
-    //http://www.apache.org/licenses/LICENSE-2.0 
 
 
 
@@ -54,6 +53,13 @@
 
 
 
+
+
+
+
+
+
+
             #################################################################
             ######                                                   ########
             ######                  FONCTIONS DEBUG                  ########
@@ -74,6 +80,22 @@
         print_r($tab);
         echo "</pre>";
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -131,6 +153,26 @@
         die("Erreur: Tileset incorrect");  // incompatibilité du tileset (pas dans la banque de tilesets)
     }
 
+    if($SOLUTION && !isset($_GET["start"])) {
+        die("Erreur: entrée inconnue");  // vérification de la présence de l'entrée du labyrinthe dans la querystring
+    }
+
+    if($SOLUTION && !isset($_GET["finish"])) {
+        die("Erreur: sortie inconnue");  // vérification de la présence de la sortie du labyrinthe dans la querystring
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -171,6 +213,11 @@
         'nbOpenWallsTarget' => $_GET["width"] * $_GET["height"] - 1,
         'seed' => $_GET["seed"]                        // seed du labyrinthe
     );
+
+    if ($SOLUTION) {
+        $infosLab["start"] = $_GET["start"];
+        $infosLab["finish"] = $_GET["finish"];
+    }
 
     if ($infosLab["seed"] == 0) $infosLab["seed"] = rand();  // pour le mode débug, on a une seed aléatoire mais elle est enregistrée
 
@@ -213,10 +260,10 @@
         if($i > ($infosLab["nbTiles"]-1)-$infosLab["width"]) {  // Test ...
             $labyrinthe[$i]["murS"]=0;                          // ... et suppression pour la bordure Sud
         }
-        if($i%$infosLab["width"]==0){  // Test ...
+        if($i%$infosLab["width"]==0) {  // Test ...
             $labyrinthe[$i]["murO"]=0;  // ... et suppression pour la bordure Ouest
         }
-        if($i%$infosLab["width"]==$infosLab["width"]-1){  // Test ...
+        if($i%$infosLab["width"]==$infosLab["width"]-1) { // Test ...
             $labyrinthe[$i]["murE"]=0;                    // ... et suppression pour la bordure Est
         }
     }
@@ -230,6 +277,16 @@
     dbg_echo("</details><hr>");
     
     
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -390,13 +447,13 @@
     // On remet les bordures du labyrinthe
     for ($i=0; $i<$infosLab["nbTiles"]; $i++) {
 
-        if ($i < $infosLab["width"] && $i!=0) {  // Test ...
+        if ($i < $infosLab["width"]) {  // Test ...
             $labyrinthe[$i]["murN"]=1;  // ... et ajout de la bordure Nord
         }
-        if($i > ($infosLab["nbTiles"]-1)-$infosLab["width"] && $i!=($infosLab["nbTiles"]-1)) {  // Test ...
+        if($i > ($infosLab["nbTiles"]-1)-$infosLab["width"]) {  // Test ...
             $labyrinthe[$i]["murS"]=1;                          // ... et ajout de la bordure Sud
         }
-        if($i%$infosLab["width"]==0){  // Test ...
+        if($i%$infosLab["width"]==0){   // Test ...
             $labyrinthe[$i]["murO"]=1;  // ... et ajoute de la bordure Ouest
         }
         if($i%$infosLab["width"]==$infosLab["width"]-1){  // Test ...
@@ -412,6 +469,34 @@
     dbg_echo("</details><hr>");
         
     
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -473,18 +558,18 @@
 
             foreach(getVoisins($noeudActuel) as $noeudSuivant){
 
-                if (in_array($noeudSuivant, $listOuverte)) continue;
-                else if(in_array($noeudSuivant, $listeFermee)) continue;
+                if (in_array($noeudSuivant, $listOuverte)) continue;      // cas où l'on ne doit pas prendre en compte le noeud suivant
+                else if(in_array($noeudSuivant, $listeFermee)) continue;  // idem
                 else {
-                    $listOuverte[]=$noeudSuivant;
+                    $listOuverte[]=$noeudSuivant;  // il n'a jamais été traité, on l'ajoute dans la liste ouverte
                 }
-                $parents[$noeudSuivant] = $noeudActuel;
+                $parents[$noeudSuivant] = $noeudActuel;  // et on spécifie son parent
             }
 
-            $listeFermee[]=$noeudActuel;
+            $listeFermee[]=$noeudActuel;  // on ajoute le noeud actuel à la liste fermée et on le marque donc comme entièrement exploré
         }
         if ($noeudActuel != $finish) {
-            dbg_echo("error");
+            dbg_echo("Erreur de résolution");  // problème de résolution (ne devrait jamais arriver)
         }
         
 
@@ -549,6 +634,7 @@
          * Renvoie un tableau avec les indices des tiles par lesquelles passe la solution
          */
         $solution=array();
+        $solution[] = $objSolution["start"];
         $noeudActuel = $objSolution["finish"];
         while ($noeudActuel !=  $objSolution["start"]) {
             $solution[] = $noeudActuel;  // on sauvegarde le noeud actuel
@@ -559,12 +645,18 @@
 
 
     if($SOLUTION && $DEBUG){
-        $objSolution = AStar(0,$infosLab["width"]*$infosLab["height"]-1);
+
+        dbg_echo("<details><summary>");
+        dbg_echo('<h2 style="display:inline">Résolution du labyrinthe</h2>');
+        dbg_echo("</summary>");
+        $objSolution = AStar($infosLab["start"],$infosLab["finish"]);
         dbg_echo('<h3>$objSolution</h3>');
         dbg_echo_tab($objSolution);
         dbg_echo('<h3>$solution</h3>');
         $solution = reconstruireSolution($objSolution);
         dbg_echo_tab($solution);
+        dbg_echo("</details><hr>");
+
     }
 
 
@@ -604,7 +696,7 @@
     if (!$DEBUG) {
 
         if ($SOLUTION) {
-            $solution = reconstruireSolution(AStar(0,$infosLab["width"]*$infosLab["height"]-1));  // on résout le labyrinthe
+            $solution = reconstruireSolution(AStar($infosLab["start"],$infosLab["finish"]));  // on résout le labyrinthe
         } else {
             $solution = [];  // aucune case n'est à colorier come étant une case de solution
         }
@@ -629,13 +721,21 @@
         $tileSize =(int) imagesy($tilesetNormal);  // On récupère la taille des tiles en regardant la hauteur du tileset car les tiles sont carrées
 
         $tilesNormal = array();  // Array qui servira à stocker toutes les tiles de manière indépendante
-        $tilesColord = array();  // Array qui servira à stocker toutes les tiles de manière indépendante
+        $tilesColored = array();  // Array qui servira à stocker toutes les tiles de manière indépendante
 
 
-        for ($i = 0; $i < 5; $i ++) {                                                                                            // On parcourt le set de tiles 
+        for ($i = 0; $i < 5; $i ++) {  // On parcourt le set de tiles 
+            // tileset normal
             $tile = imagecrop($tilesetNormal, ['x' => $i*$tileSize, 'y' => 0, 'width' => (int)$tileSize, 'height' => (int)$tileSize]);  //... et on divise le set tiles en éléments de tailles égales 
             if ($tile !== FALSE) {
                 $tilesNormal[] = $tile;
+                imagedestroy($tile);
+            }
+
+            // Tileset coloré
+            $tile = imagecrop($tilesetColored, ['x' => $i*$tileSize, 'y' => 0, 'width' => (int)$tileSize, 'height' => (int)$tileSize]);  //... et on divise le set tiles en éléments de tailles égales 
+            if ($tile !== FALSE) {
+                $tilesColored[] = $tile;
                 imagedestroy($tile);
             }
         }
@@ -719,7 +819,11 @@
                     }
                 break;
             }
-            $rotatedTile = imagerotate($tilesNormal[$indiceTile], $angle, 0); //on tourne l'image de la tile selon l'angle approprie
+            if (in_array($i, $solution))
+                $rotatedTile = imagerotate($tilesColored[$indiceTile], $angle, 0); //on tourne l'image de la tile selon l'angle approprie
+            else
+                $rotatedTile = imagerotate($tilesNormal[$indiceTile], $angle, 0); //on tourne l'image de la tile selon l'angle approprie
+        
             imagecopy($labImage, $rotatedTile, ($i%$infosLab["width"])*$tileSize, (int)($i/$infosLab["width"])*$tileSize, 0, 0, (int)$tileSize, (int)$tileSize);
             imagedestroy($rotatedTile);  // on libère la mémoire
         }
@@ -738,6 +842,7 @@
         // on libère la mémoire à la fin du rendu
         for ($i=0; $i<5; $i++) {
             imagedestroy($tilesNormal[$i]);
+            imagedestroy($tilesColored[$i]);
         }
         imagedestroy($tilesetNormal);
         imagedestroy($tilesetColored);
@@ -753,7 +858,7 @@
     } else {
 
         // ici, on est en mode debug, on requete donc generator.php avec la même querystring mais sans l'attribut DEBUG
-        $solu = ($SOLUTION)?"&SOLUTION=SOLUTION":"";
+        $solu = ($SOLUTION)?"&SOLUTION=SOLUTION" . "&start=" . $infosLab["start"] . "&finish=" . $infosLab["finish"] :"";
 
         dbg_echo("<h3>Résultat du labyrinthe :</h3>");
         dbg_echo('<img src="generator.php?width=' . $infosLab["width"] 

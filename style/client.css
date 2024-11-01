@@ -5,7 +5,7 @@ body {
 
 #bg_lab {
     width: 100%;
-    min-height: 100vh;
+    min-height: 100vw;
     position: absolute;
     top: 0;
     left: 0;
@@ -14,7 +14,7 @@ body {
     background-color: rgb(202, 202, 202);
     background-size: cover;
     background-blend-mode: multiply;
-    background-image: url("../generator.php?width=50&height=29&seed=0&imgWidth=500&imgFormat=jpg&tileset=default");
+    background-image: url("../generator.php?width=50&height=50&seed=0&imgWidth=500&imgFormat=jpg&tileset=default");
 }
 
 #main {
@@ -26,8 +26,7 @@ body {
     position: absolute;
     top: 0;
     left: 30vw;
-    border-left: 1px solid black;
-    border-right: 1px solid black;
+    border: 1px solid black;
 }
 
 form {

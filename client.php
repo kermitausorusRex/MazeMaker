@@ -65,16 +65,44 @@
     <?php
 
         hr();
-
-        mkRadioCb("checkbox", "DEBUG", "DEBUG", true);
-        mkLabel("DEBUG", "Mode débuggage");
-
-        br();
+        echo("<h3>Paramètres de résolution</h3>");
 
         mkRadioCb("checkbox", "SOLUTION", "SOLUTION", true);
         mkLabel("SOLUTION", "Affichage de la solution");
 
         br();
+
+    ?>
+
+    <p>Comment spécifier un indice:</p>
+    <img src="ressources/aideIndices.png" alt="aide indices">
+
+    <?php
+
+        br();
+
+
+        mkLabel("finish", "Indice d'entrée du labyrinthe : ");
+        mkInput("number", "start", "0" , ["id"=>"start"]);
+
+        br();
+
+        mkLabel("start", "Indice de sortie du labyrinthe : ");
+        mkInput("number", "finish", "0" , ["id"=>"finish"]);
+
+
+        br();
+
+
+
+
+
+        hr();
+
+        mkRadioCb("checkbox", "DEBUG", "DEBUG", false);
+        mkLabel("DEBUG", "Mode débuggage");
+
+        hr();
 
         mkInput("submit", "", "Générer !");
         
