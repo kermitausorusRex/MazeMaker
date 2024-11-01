@@ -1,4 +1,5 @@
 <?php
+
     # : name : generator.php
     # : authors : VABOIS Juliette & DUTHOIT Thomas
     # : function : generate perfect mazes
@@ -429,59 +430,57 @@
             
 
 
-    function AStar($start, $finish) {
-        global $labyrinthe;
-        global $infosLab;
-        $gMap = mapDistancesReelles($start);
-
-        dbg_echo("<h3> Entree dans Astar avec start=$start et finish=$finish </h3>");
-
-        $openList=array($start); //contient les noeuds a evaluer
-        $closedList=array();//contient les noeuds deja evalues
-        $currentNode;
-        $nodeSuccessor;
-
-        while(!empty($openList)){
-            $solution=array();  // Tableau contenant la solution du labyrinthe
-
-            $minIdx = 0;                                               // | => on récupère le noeud (l'indice de case) avec le plus petit f (f=distance réelle + heuristique)
-            $minVal = heuristique($minIdx, $finish) + $gMap[$minIdx];  // |
-            for($i=1;$i<sizeof($openList);$i++){                       // |
-                $h = heuristique($openList[$i], $finish);              // |
-                $f = $h + $gMap[$openList[$i]];                        // |
-                if($f<$minVal){                                        // |
-                    $minIdx=$i;                                        // |
-                    $minVal=$f;                                        // |
-                }                                                      // |
-            }                                                          // |
-            $currentNode = $openList[$minIdx];                         // |
-
-            array_splice($openList, $minIdx, 1);
-
-            if($currentNode==$finish){  // on est arrivé sur le noeud de destination
-                $solution[] = $currentNode;  // on ajoute le current node à la solution
-                return $solution;
-            }
-
-            foreach(getVoisins($currentNode) as $nodeSuccessor){
-                //$successorCurrentCost=$gMap[$nodeSuccessor];
-
-                if (in_array($nodeSuccessor, $openList)) continue;
-                else if(in_array($nodeSuccessor, $closedList)) continue;
-                else {
-                    $openList[]=$nodeSuccessor;
-
+            function AStar($start, $finish) {
+                global $labyrinthe;
+                global $infosLab;
+                $gMap = mapDistancesReelles($start);
+            
+                dbg_echo("<h3> Entree dans Astar avec start=$start et finish=$finish </h3>");
+            
+                $openList = array($start); // Contient les noeuds à évaluer
+                $closedList = array(); // Contient les noeuds déjà évalués
+                $cameFrom = array(); // Pour reconstruire le chemin
+            
+                while (!empty($openList)) {
+                    $minIdx = 0; // Indice du noeud avec le plus petit f
+                    $minVal = heuristique($openList[$minIdx], $finish) + $gMap[$openList[$minIdx]];
+            
+                    for ($i = 1; $i < sizeof($openList); $i++) {
+                        $f = heuristique($openList[$i], $finish) + $gMap[$openList[$i]];
+                        if ($f < $minVal) {
+                            $minIdx = $i;
+                            $minVal = $f;
+                        }
+                    }
+            
+                    $currentNode = $openList[$minIdx];
+                    array_splice($openList, $minIdx, 1);
+            
+                    if ($currentNode == $finish) { // On est arrivé à la destination
+                        $solution = [];
+                        while (isset($cameFrom[$currentNode])) {
+                            $solution[] = $currentNode; // Ajoute le noeud au chemin
+                            $currentNode = $cameFrom[$currentNode]; // Remonte le chemin
+                        }
+                        $solution[] = $start; // Ajoute le point de départ
+                        return array_reverse($solution); // Retourne le chemin dans l'ordre
+                    }
+            
+                    foreach (getVoisins($currentNode) as $nodeSuccessor) {
+                        if (in_array($nodeSuccessor, $closedList)) continue;
+            
+                        // Si le voisin n'est pas déjà dans la liste ouverte, on l'ajoute
+                        if (!in_array($nodeSuccessor, $openList)) {
+                            $openList[] = $nodeSuccessor;
+                            $cameFrom[$nodeSuccessor] = $currentNode; // Enregistre d'où vient ce voisin
+                        }
+                    }
+            
+                    $closedList[] = $currentNode; // Marque le noeud actuel comme évalué
                 }
+            
+                return []; // Retourne un tableau vide si aucun chemin n'est trouvé
             }
-
-            $closedList[]=$currentNode;
-        }
-        if ($currentNode != $finish) {
-            dbg_echo("error");
-        }
-        
-
-    }
     
     function getVoisins($idx){
         global $infosLab;  // récupération des variables
@@ -537,30 +536,6 @@
     }
 
 
-    if($SOLUTION && $DEBUG){
-        AStar(0,$infosLab["width"]*$infosLab["height"]-1);
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -573,25 +548,36 @@
             ######                                                   ########
             #################################################################
 
+    
+    if(!$DEBUG){
 
-
-    if (!$DEBUG) {
-
+        dbg_echo("Test");
         // ici, on n'est pas en mode débug, on génère donc l'image du labyrinthe pour la renvoyer
         $tilesetNormal = imagecreatefrompng($TILESETS_AVAILABLE[$tileSetName][0]);
         $tilesetColored = imagecreatefrompng($TILESETS_AVAILABLE[$tileSetName][1]);
 
-        if ($exportAsPng)  // Header pour indiquer que le contenu est uniquement une image 
+        if($exportAsPng)  // Header pour indiquer que le contenu est uniquement une image 
             header('Content-Type: image/png');  // type MIME d'une image png     
         else
             header('Content-Type: image/jpeg');  // type MIME d'une image jpg     
         
+  
+        if($SOLUTION)
+            $solutionPath = AStar(0, $infosLab["nbTiles"]-1);
+        
+        for($i=0;$i<$infosLab["width"] * $infosLab["height"] - 1;$i++){
+            if(in_array($solutionPath, $tiles)) 
+                $tileSetPath = $TILESETS_AVAILABLE[$tileSetName][1]; // on récupère le chemin vers la tileset dans la banque de tilesets ...
+            else
+                $tileSetPath = $TILESETS_AVAILABLE[$tileSetName][0]; //...idem...
+        }
 
-        $tileSetPath = $TILESETS_AVAILABLE[$tileSetName][0]; // on récupère le chemin vers la tileset dans la banque de tilesets ...
         $tileSet = imagecreatefrompng($tileSetPath);         // ... et on récupère la tileset à partir de ce chemin
         $tileSize =(int) imagesy($tileSet);  // On récupère la taille des tiles en regardant la hauteur du tileset car les tiles sont carrées
 
         $tiles = array();  // Array qui servira à stocker toutes les tiles de manière indépendante
+
+        
 
 
         for ($i = 0; $i < 5; $i ++) {                                                                                            // On parcourt le set de tiles 
@@ -616,6 +602,9 @@
          * 0 murs (carrefour) = tile en position 0 du tableau
          * Comme les tiles ne sont pas forcement orientees dans le bon sens 
          */
+
+        
+
         $dimensionsLab = $infosLab["width"]*$infosLab["height"];
         for($i=0;$i<$dimensionsLab;$i++){
             $murN = $labyrinthe[$i]["murN"];
@@ -624,6 +613,7 @@
             $murO = $labyrinthe[$i]["murO"];
 
             $nbMursTile = $murN + $murE + $murS + $murO;
+
 
             switch($nbMursTile){
                 case 0: //carrefour
@@ -681,17 +671,13 @@
                     }
                 break;
             }
+
+        
             $rotatedTile = imagerotate($tiles[$indiceTile], $angle, 0); //on tourne l'image de la tile selon l'angle approprie
             imagecopy($labImage, $rotatedTile, ($i%$infosLab["width"])*$tileSize, (int)($i/$infosLab["width"])*$tileSize, 0, 0, (int)$tileSize, (int)$tileSize);
             imagedestroy($rotatedTile);  // on libère la mémoire
         }
 
-
-        if ($SOLUTION) {
-            //AStar($labyrinthe, $start, $goal, $infosLab);
-        
-    
-        }
 
 
         $targetWidth = $_GET["imgWidth"];  // récupération dans la querystring
@@ -733,6 +719,7 @@
                                     . $solu
                                     . '">');
     }
+
   
        
 
