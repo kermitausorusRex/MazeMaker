@@ -131,11 +131,11 @@
         $SOLUTION=true;
     }
 
-    if (!isset($_GET["width"]) || intval($_GET["width"]) <=1) {
+    if (!isset($_GET["width"]) || intval($_GET["width"]) <1) {
         $_GET["width"] = $DEFAULT_VALUES["width"];
         // die("Erreur: Largeur inconnue");  // vérification de la présence de la largeur dans la querystring
     }
-    if (!isset($_GET["height"]) || intval($_GET["height"]) <=1) {
+    if (!isset($_GET["height"]) || intval($_GET["height"]) <1) {
         $_GET["height"] = $DEFAULT_VALUES["height"];
         // die("Erreur: Longueur inconnue");  // vérification de la présence de la hauteur dans la querystring
     }
