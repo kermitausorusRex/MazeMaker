@@ -140,6 +140,11 @@
         // die("Erreur: Longueur inconnue");  // vérification de la présence de la hauteur dans la querystring
     }
 
+    if(intval($_GET["height"])*intval($_GET["width"])<=1){
+        $_GET["height"] = $DEFAULT_VALUES["height"];
+        $_GET["width"] = $DEFAULT_VALUES["width"];
+    }
+
     if (!isset($_GET["seed"])) {
         $_GET["seed"] = $DEFAULT_VALUES["seed"];
         // die("Erreur: Graine inconnue");  // vérification de la présence de la graine dans la querystring
