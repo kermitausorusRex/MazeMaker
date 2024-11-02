@@ -16,10 +16,12 @@ les différents paramètres du labyrinthe sont passés dans la querystring avec 
 - `DEBUG`: si `DEBUG` est présent dans la querystring, le générateur fonctionnera comme une page html standard et affichera le déroulé des opérations pour la génération de labyrinthe, ainsi que le résultat en bas de la page, sinon, le script renvoie juste l'image du labyrinthe
 - `imgWidth`: largeur de l'image en pixel (0 = automatique), la hauteur de l'image sera décidée automatiquement afin de maintenir un ratio d'image correct pour le labyrinthe
 - `imgFormat`: format de l'image générée, doit être compris parmis { `png` , `jpg` }
-- `tileset`: le jeu de tuiles à utiliser parmis ceux disponnibles, doit être compris parmis { `default`, `pixel` , `pacman` } mais il est toujours possible d'ajouter d'autres jeux de tuiles dans la structure `$TILESETS_AVAILABLE` au début du fichier `generator.php` 
+- `tileset`: le jeu de tuiles à utiliser parmis ceux disponnibles, doit être compris parmis { `default`, `pixel` , `pacman` , `dark` } mais il est toujours possible d'ajouter d'autres jeux de tuiles dans la structure `$TILESETS_AVAILABLE` au début du fichier `generator.php` 
 - `SOLUTION`: si `SOLUTION` est présent dans la querystring, le générateur prendra en compte `start`et `finish` pour tracer la solution du labyrinthe
-- `start`: indice de la case d'entrée du labyrinthe
-- `finish`: indice de la case de sortie du labyrinthe
+- `start`: indice de la case d'entrée du labyrinthe, cet indice doit être compris entre 0 et `width` * `height`-1. **Ce paramètre est OBLIGATOIRE si `SOLUTION` est présent dans la querystring**
+- `finish`: indice de la case de sortie du labyrinthe, cet indice doit être compris entre 0 et `width` * `height`-1. **Ce paramètre est OBLIGATOIRE si `SOLUTION` est présent dans la querystring**
+
+Seul `finish` et `start` sont obligatoires et ce uniquement si `SOLUTION`est dans la querystring, les autres paramètres ont des valeurs par défaut qui seront utilisées en cas d'absence de ces paramètres. Pour les modifier, il faut changer les valeurs de la structure `$DEFAULT_VALUES` présent au début du script, après la structure `$TILESETS_AVAILABLE`.
 
 ---
 

@@ -238,14 +238,17 @@ function mkInput($type,$name,$value="",$misc=false)
 
 
 
-function mkRadioCb($type,$name,$value,$checked=false)
+function mkRadioCb($type,$name,$value,$checked=false, $id=false)
 {
 	// Produit un champ formulaire de type radio ou checkbox
 	// Et sélectionne cet élément si le quatrième argument est vrai
 	$selectionne = "";	
 	if ($checked) 
 		$selectionne = "checked=\"checked\"";
-	echo "<input type=\"$type\" name=\"$name\" value=\"$value\"  $selectionne />\n";
+	$idradiocb = "";
+	if ($id)
+		$idradiocb = "id=\"$id\"";
+	echo "<input type=\"$type\" name=\"$name\" value=\"$value\"  $selectionne $idradiocb/>\n";
 }
 
 function mkLien($url,$label, $qs="",$attrs="")

@@ -16,11 +16,11 @@
 
 
 
-            ####################################################################
-            ######                                                      ########
-            ######                  BANQUE DE TILESETS                  ########
-            ######                                                      ########
-            ####################################################################
+            ###############################################################
+            ######                                                 ########
+            ######                  CONFIGURATION                  ########
+            ######                                                 ########
+            ###############################################################
 
     // structure qui stock tous les jeux de tile disponnibles pour le générateur ainsi que
     // le chemin vers les tilesets associés.
@@ -40,9 +40,23 @@
         "pacman" => [
             "ressources/pacman.png",
             "ressources/pacman_coloured.png"],
+        "dark" => [
+            "ressources/dark.png",
+            "ressources/dark_colored.png",
+        ]
     ];
 
 
+    // structure qui contient les valeurs par défaut des paramètres passés à l'aide de la querystring
+    // si ces paramètres ne sont pas présents dans la querystring, alors la valeur présente dans la structure sera utilisée
+    $DEFAULT_VALUES = [
+        "width" => 10,
+        "height" => 10,
+        "seed" => 0,      // = random
+        "imgWidth" => 0,  // = auto
+        "imgFormat" => "png",
+        "tileset" => "default",
+    ];
 
 
 
@@ -118,27 +132,33 @@
     }
 
     if (!isset($_GET["width"])) {
-        die("Erreur: Largeur inconnue");  // vérification de la présence de la largeur dans la querystring
+        $_GET["width"] = $DEFAULT_VALUES["width"];
+        // die("Erreur: Largeur inconnue");  // vérification de la présence de la largeur dans la querystring
     }
     if (!isset($_GET["height"])) {
-        die("Erreur: Longueur inconnue");  // vérification de la présence de la hauteur dans la querystring
+        $_GET["height"] = $DEFAULT_VALUES["height"];
+        // die("Erreur: Longueur inconnue");  // vérification de la présence de la hauteur dans la querystring
     }
 
     if (!isset($_GET["seed"])) {
-        die("Erreur: Graine inconnue");  // vérification de la présence de la graine dans la querystring
+        $_GET["seed"] = $DEFAULT_VALUES["seed"];
+        // die("Erreur: Graine inconnue");  // vérification de la présence de la graine dans la querystring
     }
 
     if (!isset($_GET["imgWidth"])) {
-        die("Erreur: Taile de l'image inconnue");  // vérification de la présence de la largeur d'image dans la querystring
+        $_GET["imgWidth"] = $DEFAULT_VALUES["imgWidth"];
+        // die("Erreur: Taile de l'image inconnue");  // vérification de la présence de la largeur d'image dans la querystring
     }
 
     if (!isset($_GET["imgFormat"])) {
-        die("Erreur: Format inconnu");  // vérification de la présence du format de l'image dans la querystring
+        $_GET["imgFormat"] = $DEFAULT_VALUES["imgFormat"];
+        // die("Erreur: Format inconnu");  // vérification de la présence du format de l'image dans la querystring
     }
     $exportAsPng = ($_GET["imgFormat"] == "png");
 
     if (!isset($_GET["tileset"])) {
-        die("Erreur: Tileset inconnu");  // vérification de la présence du tileset à utiliser dans la querystring
+        $_GET["tileset"] = $DEFAULT_VALUES["tileset"];
+        // die("Erreur: Tileset inconnu");  // vérification de la présence du tileset à utiliser dans la querystring
     }
 
     $tileSetName = $_GET["tileset"];  // on récupère le nom du tileSet
@@ -157,8 +177,16 @@
         die("Erreur: entrée inconnue");  // vérification de la présence de l'entrée du labyrinthe dans la querystring
     }
 
+    if ($SOLUTION && ($_GET["start"] < 0 || $_GET["start"] > $_GET["width"]*$_GET["height"]-1)) {
+        die("Erreur: indice d'entrée incorrect");
+    }
+
     if($SOLUTION && !isset($_GET["finish"])) {
         die("Erreur: sortie inconnue");  // vérification de la présence de la sortie du labyrinthe dans la querystring
+    }
+
+    if ($SOLUTION && ($_GET["finish"] < 0 || $_GET["finish"] > $_GET["width"]*$_GET["height"]-1)) {
+        die("Erreur: indice de sortie incorrect");
     }
 
 
@@ -219,7 +247,7 @@
         $infosLab["finish"] = $_GET["finish"];
     }
 
-    if ($infosLab["seed"] == 0) $infosLab["seed"] = rand();  // pour le mode débug, on a une seed aléatoire mais elle est enregistrée
+    if ($DEBUG && $infosLab["seed"] == 0) $infosLab["seed"] = rand();  // pour le mode débug, on a une seed aléatoire mais elle est enregistrée pour être transmise dans la querystring de l'affichage final pour que les données restent cohérentes
 
     // affichage de la structure infosLab si on est en mode debug sous la forme d'une section repliable avec la balise <details>
     dbg_echo("<details><summary>");
@@ -517,6 +545,11 @@
 
 
     function AStar($start, $finish) {
+        /**
+         * Fonction qui permet d'analyser le labyrinthe pour trouver un chemin entre la case d'indice `$start`et la case d'indice `$finish`
+         * Elle utilise l'algorithme A*
+         * Elle finie par renvoyer une structure qui contient tous les éléments nécessaire à la reconstruction du chemin pour "sortir" du labyrinthe
+         */
         global $labyrinthe;
         global $infosLab;
         $gMap = mapDistancesReelles($start);
@@ -569,13 +602,16 @@
             $listeFermee[]=$noeudActuel;  // on ajoute le noeud actuel à la liste fermée et on le marque donc comme entièrement exploré
         }
         if ($noeudActuel != $finish) {
-            dbg_echo("Erreur de résolution");  // problème de résolution (ne devrait jamais arriver)
+            dbg_echo("Erreur de résolution A*");  // problème de résolution (ne devrait jamais arriver car labyrinthe)
         }
         
 
     }
     
     function getVoisins($idx){
+        /**
+         * Renvoie les indices des tiles avec lesquelles la case d'indice `$idx` a une connection (=pas de mur entre les deux)
+         */
         global $infosLab;  // récupération des variables
         global $labyrinthe;
         $voisins=[];
@@ -591,14 +627,22 @@
         return $voisins;
     }
 
-    function heuristique($idx, $finish_idx){
+    function heuristique($idx, $finish_idx) {
+        /**
+         * Fonction heuristique qui renvoie une estimation de la distance entre une case et la case de sortie en utilisant la formule de la distance Manhattan
+         */
         global $infosLab;  // on récupère les variables 
         $dx = abs($idx%$infosLab["width"] - $finish_idx%$infosLab["width"]);  // idx%width permet de récuperer une composante X dans le labyrinthe
         $dy = abs(floor($idx/$infosLab["width"]) - floor($finish_idx/$infosLab["width"]));  // floor(idx/width) permet de récupérer la composante Y d'un indice
         return $dx + $dy;
     }
     
-    function mapDistancesReelles($start){
+    function mapDistancesReelles($start) {
+        /**
+         * Renvoie une liste associative sous la forme:
+         *      indice_de_case => distance_réelle_par_rapport_au_depart
+         * pour chaque indice de case du labyrinthe
+         */
         global $labyrinthe;  // récupération des variables qui sont en dehors du scope de la fonction
         global $infosLab;
 
@@ -646,6 +690,7 @@
 
     if($SOLUTION && $DEBUG){
 
+        // Affichage des étapes de résolution en mode DEBUG
         dbg_echo("<details><summary>");
         dbg_echo('<h2 style="display:inline">Résolution du labyrinthe</h2>');
         dbg_echo("</summary>");
@@ -858,9 +903,13 @@
     } else {
 
         // ici, on est en mode debug, on requete donc generator.php avec la même querystring mais sans l'attribut DEBUG
+
+        // on envoie les données relatives à la solution ou non
         $solu = ($SOLUTION)?"&SOLUTION=SOLUTION" . "&start=" . $infosLab["start"] . "&finish=" . $infosLab["finish"] :"";
 
         dbg_echo("<h3>Résultat du labyrinthe :</h3>");
+
+        // on requête notre script
         dbg_echo('<img src="generator.php?width=' . $infosLab["width"] 
                                     . '&height=' . $infosLab["height"] 
                                     . '&seed=' . $infosLab["seed"] 

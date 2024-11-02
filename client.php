@@ -18,7 +18,7 @@
 <body>
     <div id="bg_lab"></div>
 
-    <div id="main">
+    <div id="main" onclick="MaJInterface()">
     <h1>MazeMaker Client</h1>
     <h2>Personnalisation de votre labyrinthe</h2>
     <?php
@@ -61,21 +61,20 @@
             <option value="default">Défaut</option>
             <option value="pixel">Pixel</option>
             <option value="pacman">Pacman</option>
+            <option value="dark">Dark</option>
         </select>
     <?php
 
         hr();
         echo("<h3>Paramètres de résolution</h3>");
 
-        mkRadioCb("checkbox", "SOLUTION", "SOLUTION", true);
-        mkLabel("SOLUTION", "Affichage de la solution");
-
-        br();
-
     ?>
+        <input type="checkbox" name="SOLUTION" value="SOLUTION" checked="checked" id="SOLUTION">
+        <label for="SOLUTION"> Affichage de la solution</label>
 
-    <p>Comment spécifier un indice:</p>
-    <img src="ressources/aideIndices.png" alt="aide indices">
+        <div id="divSolu">
+        <p>Comment spécifier un indice:</p>
+        <img src="ressources/aideIndices.png" alt="aide indices">
 
     <?php
 
@@ -90,18 +89,17 @@
         mkLabel("start", "Indice de sortie du labyrinthe : ");
         mkInput("number", "finish", "0" , ["id"=>"finish"]);
 
+    ?>
+        </div>
+    <?php
 
         br();
 
 
-
-
-
         hr();
 
-        mkRadioCb("checkbox", "DEBUG", "DEBUG", false);
+        mkRadioCb("checkbox", "DEBUG", "DEBUG", false, "DEBUG");
         mkLabel("DEBUG", "Mode débuggage");
-
         hr();
 
         mkInput("submit", "", "Générer !");
@@ -110,5 +108,17 @@
     ?>
 
     <footer><p>Par DUTHOIT Thomas et VABOIS Juliette</p></footer>
+
+
+
+    <script>
+        function MaJInterface() {
+            if (document.getElementById("SOLUTION").checked) {
+                document.getElementById("divSolu").style["display"] = "block";
+            } else {
+                document.getElementById("divSolu").style["display"] = "none";
+            }
+        }
+    </script>
 </body>
 </html>

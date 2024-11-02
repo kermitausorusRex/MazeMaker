@@ -14,7 +14,7 @@ body {
     background-color: rgb(202, 202, 202);
     background-size: cover;
     background-blend-mode: multiply;
-    background-image: url("../generator.php?width=50&height=50&seed=0&imgWidth=500&imgFormat=jpg&tileset=default");
+    background-image: url("../generator.php?width=50&height=50&imgWidth=500&imgFormat=jpg&tileset=default");
 }
 
 #main {
