@@ -115,7 +115,7 @@
 
             ###################################################################
             ######                                                     ########
-            ######                  VERIFICATIONS GET                  ########
+            ######                  VÉRIFICATIONS GET                  ########
             ######                                                     ########
             ###################################################################
 
@@ -167,7 +167,7 @@
     }
 
     $tileSetName = $_GET["tileset"];  // on récupère le nom du tileSet
-    $flag = false;                    // falg utilisé pour la vérification de la compatibilité du tileSet
+    $flag = false;                    // flag utilisé pour la vérification de la compatibilité du tileSet
     foreach ($TILESETS_AVAILABLE as $ts => $_) {
         if ($ts == $tileSetName) {
             $flag = true;  // tileSet trouvé
@@ -223,21 +223,21 @@
             ################################################################
     
 
-    set_time_limit(300);  // on mets la limite de timeout à 5 minutes 
+    set_time_limit(300);  // on met la limite de timeout à 5 minutes 
                           // au cas où l'on rencontre une génération d'un gros labyrinthe
                           // afin d'éviter d'être timeout et donc d'obtenir une erreur
     
 
     dbg_echo('<h1 style="width:100%;text-align:center">generator.php - mode DEBUG</h1>');
     
-    dbg_echo("<details><summary>");  // affichage des données recu avec la querystring
+    dbg_echo("<details><summary>");  // affichage des données reçues avec la querystring
     dbg_echo('<h2 style="display:inline"><pre style="display:inline">$_GET</pre></h2>');
     dbg_echo("</summary>");
     dbg_echo_tab($_GET);
     dbg_echo("</details><hr>");
 
     
-    $infosLab = array(                                 // Structure contenant toutes les informations importantes sur le labyrinthe à génrérer
+    $infosLab = array(                                 // Structure contenant toutes les informations importantes sur le labyrinthe à générer
         'height'=> $_GET["height"],                    // largeur du labyrinthe
         'width'=> $_GET["width"],                      // hauteur du labyrinthe
         'nbTiles'=> $_GET["width"] * $_GET["height"],  // nombre de tuiles
@@ -334,18 +334,18 @@
 
             ############################################################
             ######                                              ########
-            ######                  GENERATION                  ########
+            ######                  GÉNÉRATION                  ########
             ######                                              ########
             ############################################################
 
     // FUSION ALEATOIRE
 
     // On a un labyrinthe de dimensions l*L
-    // Chaque cas a un identifiant unique, ces identifiants sont stockes dans un tableau
-    // On accede a deux id au hasard et on ouvre leur mur s'il n'est pas deja ouvert
-    // ca forme un couloir qui prend le meme id que l'un des ids d'origine
-    // on repete le processus jusqu'a ce que tous les id aient au moins un mur ouvert
-    // quand toutes les cases ont le meme id on ouvre des murs exterieurs pour l'entree et la sortie
+    // Chaque cas a un identifiant unique, ces identifiants sont stockés dans un tableau
+    // On accède à deux id au hasard et on ouvre leur mur s'il n'est pas déjà ouvert
+    // ça forme un couloir qui prend le même id que l'un des ids d'origine
+    // on répète le processus jusqu'à ce que tous les id aient au moins un mur ouvert
+    // quand toutes les cases ont le même id on ouvre des murs exterieurs pour l'entrée et la sortie
 
 
     function choisirTileAdjacenteAlea($indice) {
@@ -358,7 +358,7 @@
         // tile a droite = $tile+1 (murE)
         // tile en haut  = $tile-width (murN)
         // tile en bas   = $tile+width (murS)
-        global $labyrinthe;  // | => On récuupère les variables qui sont en dehors du scope de la fonction
+        global $labyrinthe;  // | => On récupère les variables qui sont en dehors du scope de la fonction
         global $infosLab;    // |
 
         $tile = $labyrinthe[$indice];
@@ -400,7 +400,7 @@
 
         global $labyrinthe;  // récupération de $labyrinthe qui est en dehors de scope de la fonction
 
-        // détérmination du mur à casser en fonction de l'indice des deux tiles
+        // détermination du mur à casser en fonction de l'indice des deux tiles
         if ($indice1 + 1 == $indice2) {
             // casser murE à indice1 et murO à indice2
             $labyrinthe[$indice1]["murE"] = 0;
@@ -535,13 +535,13 @@
 
             #################################################################
             ######                                                   ########
-            ######                RESOLUTION AVEC A*                 ########
+            ######                RÉSOLUTION AVEC A*                 ########
             ######                                                   ########
             #################################################################
 
             /*
             Le but de l'algorithme A* est d'attribuer des potentiels aux nodes 
-            tout en leur appliquant le meme raisonnement que pour l'algorithme 
+            tout en leur appliquant le même raisonnement que pour l'algorithme 
             de Dijkstra pour avoir une "zone d'exploration" moins importante, 
             et donc trouver la solution plus rapidement.
             */
@@ -553,7 +553,7 @@
         /**
          * Fonction qui permet d'analyser le labyrinthe pour trouver un chemin entre la case d'indice `$start`et la case d'indice `$finish`
          * Elle utilise l'algorithme A*
-         * Elle finie par renvoyer une structure qui contient tous les éléments nécessaire à la reconstruction du chemin pour "sortir" du labyrinthe
+         * Elle finie par renvoyer une structure qui contient tous les éléments nécessaires à la reconstruction du chemin pour "sortir" du labyrinthe
          */
         global $labyrinthe;
         global $infosLab;
@@ -561,8 +561,8 @@
 
         dbg_echo("<h3> Entree dans Astar avec start=$start et finish=$finish </h3>");
 
-        $listOuverte=array($start); // contient les noeuds a evaluer
-        $listeFermee=array();       // contient les noeuds deja evalues
+        $listOuverte=array($start); // contient les noeuds à évaluer
+        $listeFermee=array();       // contient les noeuds déjà évalués
         $noeudActuel;
         $noeudSuivant;
         $parents=array();  // indice du parent de chaque noeud pour pouvoir remonter la solution du labyrinthe
@@ -586,7 +586,7 @@
             array_splice($listOuverte, $minIdx, 1);  // on retire le noeud actuel de la liste ouverte
 
             if($noeudActuel==$finish){  // on est arrivé sur le noeud de destination
-                $objSolution =array(  // structure contenant toutes les données necéssaire pour remonter la solution du labyrinthe de la fin jusqu'au au début
+                $objSolution =array(  // structure contenant toutes les données necéssaire pour remonter la solution du labyrinthe de la fin jusqu'au début
                     "start" => $start,
                     "finish" => $finish,
                     "parents" => $parents,
@@ -607,7 +607,7 @@
             $listeFermee[]=$noeudActuel;  // on ajoute le noeud actuel à la liste fermée et on le marque donc comme entièrement exploré
         }
         if ($noeudActuel != $finish) {
-            dbg_echo("Erreur de résolution A*");  // problème de résolution (ne devrait jamais arriver car labyrinthe)
+            dbg_echo("Erreur de résolution A*");  // problème de résolution (ne devrait jamais arriver car labyrinthe parfait)
         }
         
 
@@ -637,7 +637,7 @@
          * Fonction heuristique qui renvoie une estimation de la distance entre une case et la case de sortie en utilisant la formule de la distance Manhattan
          */
         global $infosLab;  // on récupère les variables 
-        $dx = abs($idx%$infosLab["width"] - $finish_idx%$infosLab["width"]);  // idx%width permet de récuperer une composante X dans le labyrinthe
+        $dx = abs($idx%$infosLab["width"] - $finish_idx%$infosLab["width"]);  // idx%width permet de récupérer une composante X dans le labyrinthe
         $dy = abs(floor($idx/$infosLab["width"]) - floor($finish_idx/$infosLab["width"]));  // floor(idx/width) permet de récupérer la composante Y d'un indice
         return $dx + $dy;
     }
@@ -651,7 +651,7 @@
         global $labyrinthe;  // récupération des variables qui sont en dehors du scope de la fonction
         global $infosLab;
 
-        // distance reelle entre deux points qui sera le parametre g de notre fonction A*
+        // distance réelle entre deux points qui sera le paramètre g de notre fonction A*
         $cpt=0;  // nombre de cases déjà modifiées
         $val=0;  // valeur de distance actuelle
         $map=array();  // tableau qui contiendra les distances réelles de chaque case
@@ -748,7 +748,7 @@
         if ($SOLUTION) {
             $solution = reconstruireSolution(AStar($infosLab["start"],$infosLab["finish"]));  // on résout le labyrinthe
         } else {
-            $solution = [];  // aucune case n'est à colorier come étant une case de solution
+            $solution = [];  // aucune case n'est à colorier comme étant une case de solution
         }
 
 
@@ -799,10 +799,10 @@
          * selon le nombre de murs on attribue une tile
          * par exemple:
          * 1 mur = tile en position 3 du tableau
-         * 2 murs = tile en position 1 ou 4 du tableau (differencier murs adjacents de murs opposés)
+         * 2 murs = tile en position 1 ou 4 du tableau (différencier murs adjacents de murs opposés)
          * 3 murs = tile en position 2 du tableau
          * 0 murs (carrefour) = tile en position 0 du tableau
-         * Comme les tiles ne sont pas forcement orientees dans le bon sens 
+         * Comme les tiles ne sont pas forcément orientées dans le bon sens on peut être amenés à utiliser imagerotate de la libraire gd2
          */
         $dimensionsLab = $infosLab["width"]*$infosLab["height"];
         for($i=0;$i<$dimensionsLab;$i++){
@@ -870,9 +870,9 @@
                 break;
             }
             if (in_array($i, $solution))
-                $rotatedTile = imagerotate($tilesColored[$indiceTile], $angle, 0); //on tourne l'image de la tile selon l'angle approprie
+                $rotatedTile = imagerotate($tilesColored[$indiceTile], $angle, 0); //on tourne l'image de la tile normale selon l'angle approprié
             else
-                $rotatedTile = imagerotate($tilesNormal[$indiceTile], $angle, 0); //on tourne l'image de la tile selon l'angle approprie
+                $rotatedTile = imagerotate($tilesNormal[$indiceTile], $angle, 0); //on tourne l'image de la tile colorée selon l'angle approprié
         
             imagecopy($labImage, $rotatedTile, ($i%$infosLab["width"])*$tileSize, (int)($i/$infosLab["width"])*$tileSize, 0, 0, (int)$tileSize, (int)$tileSize);
             imagedestroy($rotatedTile);  // on libère la mémoire
@@ -880,7 +880,7 @@
 
 
         $targetWidth = $_GET["imgWidth"];  // récupération dans la querystring
-        if ($targetWidth != 0) {  // si la taille de l'image a été choisie par l'utilisateur plutot que par le programme
+        if ($targetWidth != 0) {  // si la taille de l'image a été choisie par l'utilisateur plutôt que par le programme
             $labImage = imagescale($labImage, $targetWidth);  // alors on redimensionne l'image
         }
 
@@ -907,7 +907,7 @@
 
     } else {
 
-        // ici, on est en mode debug, on requete donc generator.php avec la même querystring mais sans l'attribut DEBUG
+        // ici, on est en mode debug, on requête donc generator.php avec la même querystring mais sans l'attribut DEBUG
 
         // on envoie les données relatives à la solution ou non
         $solu = ($SOLUTION)?"&SOLUTION=SOLUTION" . "&start=" . $infosLab["start"] . "&finish=" . $infosLab["finish"] :"";
